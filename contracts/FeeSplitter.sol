@@ -5,6 +5,10 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface IApolloStaking {
+	function notifyNewRewards (uint256 amount) external
+}
+
 contract FeeSplitter is ReentrancyGuard, Ownable {
   // ApolloToken contract interface
   IERC20 public apolloToken;
@@ -15,9 +19,9 @@ contract FeeSplitter is ReentrancyGuard, Ownable {
   address public otherBeneficiary; // Example: community fund or charity
 
   // Fee distribution percentages (must add up to 100%)
-  uint256 public stakingShare = 50; // 50%
-  uint256 public treasuryShare = 30; // 30%
-  uint256 public otherShare = 20; // 20%
+  uint256 public stakingShare = 50;
+  uint256 public treasuryShare = 30;
+  uint256 public otherShare = 20;
 
   // Event for logging fee distribution
   event FeesDistributed(uint256 totalAmount, uint256 stakingAmount, uint256 treasuryAmount, uint256 otherAmount);
@@ -35,7 +39,7 @@ contract FeeSplitter is ReentrancyGuard, Ownable {
     }
 
   // Function to distribute fees
-  function distributeFees() public nonReentrant onlyOwner {
+  function distributeFees() public nonReentrant {
     uint256 totalBalance = address(this).balance;
     require(totalBalance > 0, "No fees to distribute");
 
@@ -49,9 +53,9 @@ contract FeeSplitter is ReentrancyGuard, Ownable {
         // Adjust to prevent overflow
         otherAmount -= totalDistributed - totalBalance;
       }
-
+				// Notify staking contract about new rewards
+			IApolloStaking(stakingContract).notifyNewRewards(stakingAmount);
         // Transfer funds
-    	payable(stakingContract).transfer(stakingAmount);
       payable(treasury).transfer(treasuryAmount);
       payable(otherBeneficiary).transfer(otherAmount);
 
