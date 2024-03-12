@@ -1,0 +1,34 @@
+require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-ethers");
+const fs = require('fs');
+// const infuraId = fs.readFileSync(".infuraid").toString().trim() || "";
+
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
+
+module.exports = {
+  defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {
+      chainId: 1337
+    },
+    sepolia: {
+      url: "https://eth-sepolia.g.alchemy.com/v2/1zp6HYRDShseVKAlXrYW5tgThCDE4V3n", // Use the Sepolia RPC URL from your .env file
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [] // Use your private key from the .env file
+    }
+  },
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  }
+};
