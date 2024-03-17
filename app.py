@@ -52,37 +52,33 @@ with st.form('List NFT Form'):
         tx_hash = nft_marketplace.functions.createToken(image_uri, web3.toWei(nft_price, 'ether')).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
         st.write(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
 
-# Auctions Tab
+# Auctions
 st.header('Auctions')
-st.subheader('Create Auction')
 with st.form('Create Auction Form'):
-    auction_token_id = st.number_input('Token ID', min_value=1, key='create_auction_token_id')
-    auction_min_price = st.number_input('Minimum Price (in ETH)', min_value=0.01, key='create_auction_min_price')
-    auction_duration = st.number_input('Duration (in seconds)', min_value=60, key='create_auction_duration')
-    create_auction = st.form_submit_button('Create Auction', key='create_auction_button')
+    auction_token_id = st.number_input('Token ID', min_value=1)
+    auction_min_price = st.number_input('Minimum Price (in ETH)', min_value=0.01)
+    auction_duration = st.number_input('Duration (in seconds)', min_value=60)
+    create_auction = st.form_submit_button('Create Auction')
+    if create_auction:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.createAuction(auction_token_id, web3.toWei(auction_min_price, 'ether'), auction_duration).transact({'from': account})
+        st.write(f'Auction created for Token ID {auction_token_id}. Transaction Hash: {tx_hash.hex()}')
 
-if create_auction:
-    account = web3.eth.accounts[0]
-    tx_hash = nft_marketplace.functions.createAuction(auction_token_id, web3.toWei(auction_min_price, 'ether'), auction_duration).transact({'from': account})
-    st.write(f'Auction created for Token ID {auction_token_id}. Transaction Hash: {tx_hash.hex()}')
-
-st.subheader('Bid on Auction')
+st.header('Bid on Auctions')
 with st.form('Bid Form'):
-    bid_token_id = st.number_input('Token ID to Bid On', min_value=1, key='bid_token_id')
-    bid_amount = st.number_input('Bid Amount (in ETH)', min_value=0.01, key='bid_amount')
-    place_bid = st.form_submit_button('Place Bid', key='place_bid_button')
+    bid_token_id = st.number_input('Token ID to Bid On', min_value=1)
+    bid_amount = st.number_input('Bid Amount (in ETH)', min_value=0.01)
+    place_bid = st.form_submit_button('Place Bid')
+    if place_bid:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.bid(bid_token_id).transact({'from': account, 'value': web3.toWei(bid_amount, 'ether')})
+        st.write(f'Bid placed for Token ID {bid_token_id} with amount {bid_amount} ETH. Transaction Hash: {tx_hash.hex()}')
 
-if place_bid:
-    account = web3.eth.accounts[0]
-    tx_hash = nft_marketplace.functions.bid(bid_token_id).transact({'from': account, 'value': web3.toWei(bid_amount, 'ether')})
-    st.write(f'Bid placed for Token ID {bid_token_id} with amount {bid_amount} ETH. Transaction Hash: {tx_hash.hex()}')
-
-st.subheader('End Auction')
+st.header('End Auctions')
 with st.form('End Auction Form'):
-    end_auction_token_id = st.number_input('Token ID to End Auction', min_value=1, key='end_auction_token_id')
-    end_auction = st.form_submit_button('End Auction', key='end_auction_button')
-
-if end_auction:
-    account = web3.eth.accounts[0]
-    tx_hash = nft_marketplace.functions.endAuction(end_auction_token_id).transact({'from': account})
-    st.write(f'Auction ended for Token ID {end_auction_token_id}. Transaction Hash: {tx_hash.hex()}')
+    end_auction_token_id = st.number_input('Token ID to End Auction', min_value=1)
+    end_auction = st.form_submit_button('End Auction')
+    if end_auction:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.endAuction(end_auction_token_id).transact({'from': account})
+        st.write(f'Auction ended for Token ID {end_auction_token_id}. Transaction Hash: {tx_hash.hex()}')
