@@ -40,32 +40,46 @@ if st.sidebar.button('Load NFTs'):
 
 # List NFT
 st.header('List My NFT')
-with st.form('List NFT Form'):
+with st.form('List NFT Form', clear_on_submit=True):
     nft_name = st.text_input('NFT Name')
     nft_description = st.text_area('NFT Description')
     nft_price = st.number_input('Price (in ETH)', min_value=0.01)
     nft_image = st.file_uploader('Upload Image (<500 kB)', type=['png', 'jpg', 'jpeg'])
 
     submitted = st.form_submit_button('List NFT')
-    if submitted and nft_image is not None:
-            # Upload image to IPFS and get the URI
-            image_uri = upload_file_to_ipfs(nft_image)
-            if image_uri['success']:
-                image_ipfs_url = image_uri['pinataURL']
-                price_wei = int(web3.toWei(nft_price, 'ether'))
-                account = web3.eth.accounts[0]
+
+if submitted:
+    if nft_image is not None:
+        # Upload image to IPFS and get the URI
+        image_uri_response = upload_file_to_ipfs(nft_image)
+        if image_uri_response and image_uri_response.get('success'):
+            image_ipfs_url = image_uri_response.get('pinataURL')
+
+            # Preparing Metadata
+            nft_metadata = {
+                "name": nft_name,
+                "description": nft_description,
+                "image": image_ipfs_url,
+                "attributes": [{"trait_type": "Price", "value": f"{nft_price} ETH"}]
+            }
+            # Upload Metadata to IPFS
+            metadata_uri_response = upload_json_to_ipfs(nft_metadata)
+            if metadata_uri_response and metadata_uri_response.get('success'):
+                metadata_ipfs_url = metadata_uri_response.get('pinataURL')
+                
+                # Mint NFT with metadata
+                price_wei = web3.toWei(nft_price, 'ether')
                 try:
-                    tx_hash = nft_marketplace.functions.createToken(image_ipfs_url, price_wei).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
-                    st.success(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
+                    tx_hash = nft_marketplace.functions.createToken(metadata_ipfs_url, price_wei).transact({'from': web3.eth.accounts[0], 'value': web3.toWei(0.01, 'ether')})
+                    st.success(f'NFT successfully minted with metadata. Transaction Hash: {tx_hash.hex()}')
                 except Exception as e:
                     st.error(f'Error minting NFT: {e}')
             else:
-                st.error('Failed to upload image to IPFS.')
-            
-            # Create token and list NFT
-            #account = web3.eth.accounts[0]
-            #tx_hash = nft_marketplace.functions.createToken(image_uri, web3.toWei(nft_price, 'ether')).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
-            #st.write(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
+                st.error('Failed to upload NFT metadata to IPFS.')
+        else:
+            st.error('Failed to upload image to IPFS.')
+    else:
+        st.error('Please upload an image for the NFT.')
 
 # Auctions
 st.header('Auctions')
