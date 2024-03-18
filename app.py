@@ -32,8 +32,11 @@ st.sidebar.button('Connect Wallet')
 # Display NFTs
 st.header('NFT Gallery')
 if st.sidebar.button('Load NFTs'):
-    # Logic to load NFTs goes here
-    st.write('NFTs will be displayed here')
+    total_nfts = nft_marketplace.functions.totalSupply().call()
+    for i in range(total_nfts):
+        token_uri = nft_marketplace.functions.tokenURI(i + 1).call()
+        st.image(token_uri, width=200)
+        st.write(f'Token ID: {i + 1}')
 
 # List NFT
 st.header('List My NFT')
@@ -45,6 +48,7 @@ with st.form('List NFT Form'):
 
     submitted = st.form_submit_button('List NFT')
     if submitted and nft_image is not None:
+<<<<<<< HEAD
         # Convert the uploaded file to bytes
         image_bytes = nft_image.read()
         # Temporary save image to disk
@@ -85,12 +89,42 @@ with st.form('List NFT Form'):
             st.error("Failed to upload image to IPFS.")
     elif submitted:
         st.error("Please upload an image for the NFT.")
+=======
+        # Upload image to IPFS and get the URI
+        image_uri = upload_to_ipfs(nft_image)
+        # Create token and list NFT
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.createToken(image_uri, web3.toWei(nft_price, 'ether')).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
+        st.write(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
+>>>>>>> main
 
-# Auctions (this will need more logic to handle auctions based on your contract)
+# Auctions
 st.header('Auctions')
-# Logic to handle and display auctions
+with st.form('Create Auction Form'):
+    auction_token_id = st.number_input('Token ID', min_value=1)
+    auction_min_price = st.number_input('Minimum Price (in ETH)', min_value=0.01)
+    auction_duration = st.number_input('Duration (in seconds)', min_value=60)
+    create_auction = st.form_submit_button('Create Auction')
+    if create_auction:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.createAuction(auction_token_id, web3.toWei(auction_min_price, 'ether'), auction_duration).transact({'from': account})
+        st.write(f'Auction created for Token ID {auction_token_id}. Transaction Hash: {tx_hash.hex()}')
 
-# additional functionality needed:
-# - Interacting with MetaMask to handle transactions
-# - Uploading images to IPFS and storing the metadata
-# - Real-time updating of NFT listings and auctions
+st.header('Bid on Auctions')
+with st.form('Bid Form'):
+    bid_token_id = st.number_input('Token ID to Bid On', min_value=1)
+    bid_amount = st.number_input('Bid Amount (in ETH)', min_value=0.01)
+    place_bid = st.form_submit_button('Place Bid')
+    if place_bid:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.bid(bid_token_id).transact({'from': account, 'value': web3.toWei(bid_amount, 'ether')})
+        st.write(f'Bid placed for Token ID {bid_token_id} with amount {bid_amount} ETH. Transaction Hash: {tx_hash.hex()}')
+
+st.header('End Auctions')
+with st.form('End Auction Form'):
+    end_auction_token_id = st.number_input('Token ID to End Auction', min_value=1)
+    end_auction = st.form_submit_button('End Auction')
+    if end_auction:
+        account = web3.eth.accounts[0]
+        tx_hash = nft_marketplace.functions.endAuction(end_auction_token_id).transact({'from': account})
+        st.write(f'Auction ended for Token ID {end_auction_token_id}. Transaction Hash: {tx_hash.hex()}')
