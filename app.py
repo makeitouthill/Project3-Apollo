@@ -48,55 +48,24 @@ with st.form('List NFT Form'):
 
     submitted = st.form_submit_button('List NFT')
     if submitted and nft_image is not None:
-<<<<<<< HEAD
-        # Convert the uploaded file to bytes
-        image_bytes = nft_image.read()
-        # Temporary save image to disk
-        temp_file_path = "temp_image.png"
-        with open(temp_file_path, "wb") as f:
-            f.write(image_bytes)
-
-            # Uploading image to Pinata IPFS
-        image_response = upload_file_to_ipfs(temp_file_path)
-        if image_response['success']:
-            image_ipfs_url = image_response['pinataURL']
-            # Cleanup the temporary image file after upload
-            os.remove(temp_file_path)
-            # Create metadata
-            metadata = {
-                "name": nft_name,
-                "description": nft_description,
-                "image": image_ipfs_url
-            }
-            metadata_response = upload_json_to_ipfs(metadata)
-            if metadata_response['success']:
-                metadata_ipfs_url = metadata_response['pinataURL']
-                seller_private_key = st.text_input('Your Private Key', type='password')  # NEVER expose private keys in production apps
-                if seller_private_key:
-                    # Attempt to mint NFT with provided metadata URL and price
-                    price_wei = web3.to_wei(nft_price, 'ether')
-                    tx_receipt = mint_nft(metadata_ipfs_url, price_wei, seller_private_key)
-                    if tx_receipt:
-                        st.success(f"NFT successfully minted. Transaction hash: {tx_receipt.transactionHash.hex()}")
-                    else:
-                        st.error("Failed to mint NFT.")
-                else:
-                    st.warning("Enter your private key to mint the NFT.")
-                st.success(f'NFT successfully listed with IPFS URL: {metadata_ipfs_url}')
+            # Upload image to IPFS and get the URI
+            image_uri = upload_file_to_ipfs(nft_image)
+            if image_uri['success']:
+                image_ipfs_url = image_uri['pinataURL']
+                price_wei = int(web3.toWei(nft_price, 'ether'))
+                account = web3.eth.accounts[0]
+                try:
+                    tx_hash = nft_marketplace.functions.createToken(image_ipfs_url, price_wei).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
+                    st.success(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
+                except Exception as e:
+                    st.error(f'Error minting NFT: {e}')
             else:
-                st.error("Failed to upload NFT metadata to IPFS.")
-        else:
-            st.error("Failed to upload image to IPFS.")
-    elif submitted:
-        st.error("Please upload an image for the NFT.")
-=======
-        # Upload image to IPFS and get the URI
-        image_uri = upload_to_ipfs(nft_image)
-        # Create token and list NFT
-        account = web3.eth.accounts[0]
-        tx_hash = nft_marketplace.functions.createToken(image_uri, web3.toWei(nft_price, 'ether')).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
-        st.write(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
->>>>>>> main
+                st.error('Failed to upload image to IPFS.')
+            
+            # Create token and list NFT
+            #account = web3.eth.accounts[0]
+            #tx_hash = nft_marketplace.functions.createToken(image_uri, web3.toWei(nft_price, 'ether')).transact({'from': account, 'value': web3.toWei(0.01, 'ether')})
+            #st.write(f'You are listing {nft_name} for {nft_price} ETH. Transaction Hash: {tx_hash.hex()}')
 
 # Auctions
 st.header('Auctions')
