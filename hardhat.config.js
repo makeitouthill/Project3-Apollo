@@ -18,10 +18,10 @@ module.exports = {
     hardhat: {
       chainId: 1337
     },
-    sepolia: {
-      url: process.env.SEPOLIA_URL, // Use the Sepolia RPC URL from your .env file
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [] // Use your private key from the .env file
-    }
+    //sepolia: {
+    //  url: process.env.SEPOLIA_URL, // Use the Sepolia RPC URL from your .env file
+    //  accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [] // Use your private key from the .env file
+    //}
   },
   solidity: {
     version: "0.8.20",
