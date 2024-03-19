@@ -62,7 +62,6 @@ After completing the installation steps, visit http://localhost:8501 in your web
 
 ### Features
 - Mint NFTs with custom metadata.  
-- List and manage NFTs on the marketplace.  
 - Load Total Nft supply, and display them in the NFT Gallery.  
 - Interactive UI for a friendly user experience.  
 <br>
