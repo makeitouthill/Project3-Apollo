@@ -1,5 +1,6 @@
 # Apollo NFT Marketplace
 
+![Apollo_Streamlit_demostration](https://github.com/makeitouthill/Project3-Apollo/assets/67214695/15f52584-d0c8-46d5-947b-e1bd68d700f6)
 
 ## Introduction
 Apollo NFT Marketplace is a decentralized application that allows users to mint, list, and trade NFTs on the Ethereum blockchain. Built with Solidity, Hardhat, and Streamlit, it provides a seamless experience for both creators and collectors.
@@ -13,12 +14,12 @@ Hardhat
 Streamlit  
 Anaconda  
 # Installation  
-## Follow these steps to set up the project environment:
-
+## Follow these steps to set up the project environment:   
+<br>
 1. Node.js Dependencies 
 <br> 
 `npm install`  
-Installs the necessary Node.js packages defined in package.json.
+Installs the necessary Node.js packages defined in package.json.  
 <br>
 2. Python Dependencies
 <br>
